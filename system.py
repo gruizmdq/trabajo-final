@@ -1,16 +1,9 @@
 # import the necessary packages
-from imutils.video import VideoStream
 from imutils.video import FPS
-import numpy as np
-import imutils
-import pickle
-import time
 import cv2
-import os
 from recognize_video import FaceRecognizer
 from detector import FaceDetector
 from camera import Camera
-import constants as CONSTANTS
 
 class System(object):
     """

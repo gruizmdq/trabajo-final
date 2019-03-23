@@ -1,12 +1,9 @@
 # import the necessary packages
-from imutils.video import VideoStream
-from imutils.video import FPS
-import numpy as np
-import imutils
+import os
 import pickle
 import time
+import numpy as np
 import cv2
-import os
 import constants as CONSTANTS
 
 
