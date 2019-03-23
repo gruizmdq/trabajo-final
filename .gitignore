@@ -1,7 +1,11 @@
 # Don't track content of these folders
 dataset/
 unrecognized/
-
+.pylintrc
+ToDo
+__init__.py
+venv/
+__pycache__/
 
 # Compiled source #
 ###################
