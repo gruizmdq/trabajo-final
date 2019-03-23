@@ -16,19 +16,14 @@ class FaceRecognizer():
 	FaceRecognizer. This identify the faces of the frames.
 	"""
 	# load our serialized face embedding model from disk
-	#print("[INFO] loading face recognizer...")
+	print("[INFO] loading face recognizer...")
 	embedder = cv2.dnn.readNetFromTorch(CONSTANTS.EMBEDDING_MODEL_PATH)
 	# load the actual face recognition model along with the label encoder
 	recognizer = pickle.loads(open(CONSTANTS.RECOGNIZER_PATH, "rb").read())
 	le = pickle.loads(open(CONSTANTS.LABEL_ENCODER_PATH, "rb").read())
 
 	def __init__(self):
-		# initialize the video stream, then allow the camera sensor to warm up
-		#last time do not reconized face
-		self.last_time = time.time()		
-		#self.vs = VideoStream(src=0).start()
-		#time.sleep(2.0)
-		#self.detection()
+		self.last_time = time.time()
 
 	def save_frame(self, frame):
 		img_item =  CONSTANTS.UNRECOGNIZED_FACES_PATH + str(len(os.listdir(CONSTANTS.UNRECOGNIZED_FACES_PATH))) + ".png"

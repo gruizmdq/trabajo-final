@@ -12,22 +12,11 @@ from detector import FaceDetector
 from camera import Camera
 import constants as CONSTANTS
 
-# load our serialized face detector from disk
-#print("[INFO] loading face detector...")
-#protoPath = os.path.sep.join([CONSTANTS.MODEL_PATH, CONSTANTS.MODEL_PROTOTXT])
-#modelPath = os.path.sep.join([CONSTANTS.MODEL_PATH, CONSTANTS.MODEL_PRE_TRAINEED])
-#detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
-
-# load our serialized face embedding model from disk
-#print("[INFO] loading face recognizer...")
-#embedder = cv2.dnn.readNetFromTorch(CONSTANTS.EMBEDDING_MODEL_PATH)
-
-# load the actual face recognition model along with the label encoder
-#recognizer = pickle.loads(open(CONSTANTS.RECOGNIZER_PATH, "rb").read())
-#le = pickle.loads(open(CONSTANTS.LABEL_ENCODER_PATH, "rb").read())
-
 class System(object):
-
+    """
+    System: main class. 
+    Everything is going across this object.
+    """
     def __init__(self):
         self.recognizer = FaceRecognizer()
         self.detector = FaceDetector(self)
@@ -43,14 +32,18 @@ class System(object):
             fps = FPS().start()
             while True:
                 frame = camera.get_frame()
-                self.detector.detect(frame)
 
+                #Detection
+                face, frame, startX, startY, endX, endY = self.detector.detect(frame)
+                #Recognition
+                self.recognizer.make_prediction(face, frame, startX, startY, endX, endY)
+
+                cv2.imshow("Frame", frame)
 
                 # update the FPS counter
                 fps.update()
 
                 key = cv2.waitKey(1) & 0xFF
-
                 # if the `q` key was pressed, break from the loop
                 if key == ord("q"):
                     break
