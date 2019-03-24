@@ -36,6 +36,8 @@ class FaceDetector():
         self.detector.setInput(imageBlob)
         detections = self.detector.forward()
 
+        #array with all faces detected
+        arr_faces = []
         for i in range(0, detections.shape[2]):
             # extract the confidence (i.e., probability) associated with
             # the prediction
@@ -55,15 +57,15 @@ class FaceDetector():
                 # ensure the face width and height are sufficiently large
                 if fW < 20 and fH < 20:
                     continue
-
+                arr_faces.append([face, startX, startY, endX, endY])
                 # Adding try to fix bug.
                 #try:
-                 #   self.controller.recognizer.make_prediction(face, frame, startX, startY, endX, endY)
+                 #  self.controller.recognizer.make_prediction(face, frame, startX, startY, endX, endY)
                 #except Exception as e:
-                 #   print(str(e))
+                 #  print(str(e))
 
         # show the output frame
-        return face, frame, startX, startY, endX, endY
+        return frame, arr_faces
 
 
     def save_frame(self, frame):

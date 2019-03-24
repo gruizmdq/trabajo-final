@@ -8,7 +8,7 @@ from camera import Camera
 class System(object):
     """
     System: main class. 
-    Everything is going across this object.
+    Everything go across this object.
     """
     def __init__(self):
         self.recognizer = FaceRecognizer()
@@ -18,6 +18,7 @@ class System(object):
         self.start()
 
     def start(self):
+
         for camera in self.cameras:
             
             camera.init()
@@ -26,11 +27,17 @@ class System(object):
             while True:
                 frame = camera.get_frame()
 
-                #Detection
-                face, frame, startX, startY, endX, endY = self.detector.detect(frame)
+                #Detection, then detector will call recognizer.
+                frame, faces = self.detector.detect(frame)
                 #Recognition
-                self.recognizer.make_prediction(face, frame, startX, startY, endX, endY)
-
+                if not (faces is None):
+                    for face in faces:
+                        try:
+                            #face, frame, startX, startY, endX, endY
+                            self.recognizer.make_prediction(face[0], frame, face[1], face[2], face[3], face[4])
+                        except Exception as e:
+                            print(str(e))
+                            
                 cv2.imshow("Frame", frame)
 
                 # update the FPS counter
