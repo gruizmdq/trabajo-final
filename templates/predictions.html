@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Material Design Bootstrap</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="static/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="static/css/mdb.min.css" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="static/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <div class="container">
+      <div class="row">
+        {% for prediction in predictions %}
+        <div class="col-md-3">
+            <div class="card">
+                <img class="card-img-top" src="https://mdbootstrap.com/img/Photos/Others/images/43.jpg" alt="Card image cap">
+                {% if prediction.recognized  %}
+                <div class="card-body bg-green white-text">
+                {% else %}
+                <div class="card-body bg-red white-text">
+                {% endif %}
+                <h4 class="card-title"><a>{{ prediction.name }} - {{ prediction.confidence }}%</a></h4>
+                <p class="card-text">{{ prediction.time }}</p>
+                <a href="#" class="btn btn-primary">Button</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <!-- Card -->
+      </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <!-- JQuery -->
+  <script type="text/javascript" src="static/js/jquery-3.3.1.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="static/js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="static/js/mdb.min.js"></script>
+</body>
+
+</html>
