@@ -1,4 +1,11 @@
-#PATHS
+#DATABASE
+DATABASE_NAME = 'security_system'
+COLLECTION_USERS = 'users'
+COLLECTION_DETECTIONS = 'detections'
+COLLECTION_ALERTS = 'alerts'
+COLLECTION_PEOPLE = 'people'
+
+
 MODEL_PATH = 'face_detection_model/'
 MODEL_PROTOTXT = 'deploy.prototxt'
 MODEL_PRE_TRAINEED = 'res10_300x300_ssd_iter_140000.caffemodel'

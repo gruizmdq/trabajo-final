@@ -7,7 +7,6 @@ import cv2
 import constants as CONSTANTS
 from person import Person
 
-
 class FaceRecognizer():
 	"""
 	FaceRecognizer. This identify the faces from a frame.
@@ -21,6 +20,7 @@ class FaceRecognizer():
 
 	def __init__(self, system):
 		self.last_time = time.time()
+		self.unknowns_count = 0
 		self.system = system
 
 	def save_frame(self, text, frame):
@@ -43,6 +43,7 @@ class FaceRecognizer():
 
 		# draw the bounding box of the face along with the
 		# associated probability
+		
 		if proba > CONSTANTS.CONFIDENCE_TO_ACCEPT_RECOGNITION:
 			text = "{}: {:.2f}%".format(name, proba * 100)
 			color = (0, 0, 255)
@@ -50,25 +51,20 @@ class FaceRecognizer():
 
 		else: 
 			text = "unknown"
+			
 			color = (255, 0, 0)
 			recognized = False
 			now = time.time()
-			#Timer to avoid multi saves per second
-			if now - self.last_time > CONSTANTS.SECONDS_BETWEEN_CAPTURE:
-				self.last_time = now
-				self.system.add_prediction(Person(proba, text, False))
-
-				if proba > CONSTANTS.CONFIDENCE_TO_UNKNOWN_FACES:
-					text = name + "/"
-				else:
-					text = "unknown/"
-			self.save_frame(text, frame)
+			if proba > CONSTANTS.CONFIDENCE_TO_UNKNOWN_FACES:
+				name = text + "-" + name
+			else:
+				self.unknowns_count += 1
+				name = text + str(self.unknowns_count)
 
 		y = startY - 10 if startY - 10 > 10 else startY + 10
 		cv2.rectangle(frame, (startX, startY), (endX, endY),
 				color, 2)
 		cv2.putText(frame, text, (startX, y),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
-
 		return {"name": name, "face": face, "confidence": proba, "recognized": recognized}
 		

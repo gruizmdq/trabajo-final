@@ -18,7 +18,7 @@ class System(object):
         self.detector = FaceDetector(self)
         self.cameras = []
         self.camerasThreads = []
-        self.predictions = []
+        self.test_until_database_detections = {}
         #self.start()
         #self.add_camera(Camera())
 
@@ -50,9 +50,32 @@ class System(object):
 
             #Detection
             frame, faces = self.detector.detect(frame)
-            #Recognition
-
-            if not (faces is None):
+            people = camera.update_people(faces)
+            
+            if not (people is None):
+                for person in people.values():
+                    try:
+                        #face, frame, startX, startY, endX, endY
+                        face = person.face
+                        text = "ID {} - {} - {}".format(person.id, person.name, person.confidence)
+                        cv2.putText(frame, text, (person.centroid[0] - 10, person.centroid[1] - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                        cv2.circle(frame, (person.centroid[0], person.centroid[1]), 4, (0, 255, 0), -1)
+                       
+                        #Recognition 
+                        if person.confidence < CONSTANTS.CONFIDENCE_TO_ACCEPT_RECOGNITION:
+                            prediction = self.recognizer.make_prediction(face[0], frame, face[1], face[2], face[3], face[4])
+                            
+                            if not (prediction is None):
+                                person.confidence = prediction['confidence']
+                                person.name = prediction['name']
+                                self.test_until_database_detections[person.id] = person
+                    except Exception as e:
+                        print(str(e))
+                    
+                
+            cv2.imshow("asd", frame)
+            """ if not (faces is None):
                 for face in faces:
                     try:
                         #face, frame, startX, startY, endX, endY
@@ -65,14 +88,22 @@ class System(object):
 
                                     if prediction['confidence'] > CONSTANTS.CONFIDENCE_TO_ACCEPT_RECOGNITION:
                                         camera.recognized_people[prediction['name']].name = prediction['name']
-                                    
-                                    camera.recognized_people[prediction['name']].set_thumb(face)
+                                        camera.recognized_people[prediction['name']].recognized = prediction['recognized']
+                                        
+                                    camera.recognized_people[prediction['name']].set_thumb(prediction["face"])
                                     camera.recognized_people[prediction['name']].set_time()
                             else:
+                                #Check if predictions is unknown
                                 camera.recognized_people[prediction["name"]] = Person(prediction['confidence'], prediction['name'], prediction['face'], prediction['recognized'])
-                    
+                                
+                                #if prediction["name"].find('unknown') == -1:
+                                #    camera.recognized_people[prediction["name"]] = Person(prediction['confidence'], prediction['name'], prediction['face'], prediction['recognized'])
+                                #check if it's existing unknown prediction. (will compare whit each unkwnon prediction)
+                                #else: 
+                                    #check_unknown
+
                     except Exception as e:
-                        print(str(e))
+                        print(str(e)) """
             
             
             
@@ -81,7 +112,7 @@ class System(object):
             #frame = cv2.resize(frame,None,fx=0.5,fy=0.5)     
             # Save processed frame to stream later      
             camera.processedFrame = frame
-            cv2.imshow("Frame", frame)
+            #cv2.imshow("Frame", frame)
 
             # update the FPS counter
             fps.update()
@@ -99,8 +130,7 @@ class System(object):
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
         #cv2.destroyAllWindows()
         #camera.stop()
+    
 
-    def add_prediction(self, person):
-        self.predictions.append(person)
 
         
