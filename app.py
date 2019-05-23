@@ -1,3 +1,4 @@
+import time
 from flask import Flask, Response, render_template, request, redirect
 from flask_socketio import SocketIO, send, emit
 from flask_pymongo import PyMongo
@@ -5,16 +6,21 @@ from flask_bcrypt import Bcrypt
 from camera import Camera
 from system import System
 import json
+import psutil
 import cv2
+import threading
 
 system = System()
-camera = Camera(0)
+camera = Camera(0, system)
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/security_system"
 bcrypt = Bcrypt()
 mongo = PyMongo(app)
 system.add_camera(camera)
 socketio = SocketIO(app)
+
+monitoringThread = threading.Thread()
+monitoringThread.daemon = False
 
 @app.route("/")
 def hello():
@@ -93,9 +99,9 @@ def video_streamer2(id):
 def get_faces():
   prediction_array = []
  # for key, prediction in camera.detected_people.items():
-  if system.test_until_database_detections.items() is not None:
-    for key, prediction in system.test_until_database_detections.items():
-      prediction_array.append({'name': prediction.name, 'confidence': "{:.2f}".format(prediction.confidence*100), 'time': prediction.time, 'recognized': True, 'id': prediction.id, 'camera': camera.id})
+  arr = mongo.db['detections'].find({})
+  for i in arr:
+    prediction_array.append({'name': i['name'], 'confidence': "{:.2f}".format(i['confidence']*100), 'time': i['date'], 'recognized': True, 'camera': i['camera'], 'thumb': i['thumb']})
   return json.dumps(prediction_array)
 
 @app.route('/remove_face', methods=['POST'])
@@ -106,12 +112,44 @@ def remove_face():
   return camera.remove_face(request.form['name'])
   #return render_template('login.html', error = error)
 
+
+def system_stats():
+  while True:
+    camerasFPS = []
+    for camera in system.cameras:
+        camerasFPS.append(camera.fps)
+        #print "FPS: " +str(camera.processingFPS) + " " + str(camera.streamingFPS)
+        #app.logger.info("FPS: " +str(camera.processingFPS) + " " + str(camera.streamingFPS))
+    systemState = {'cpu':cpu_usage(),'memory':memory_usage(), 'camerasFPS': camerasFPS}
+    socketio.emit('system_monitoring', json.dumps(systemState) ,namespace='/system')
+    time.sleep(5)
+
+def cpu_usage():
+      psutil.cpu_percent(interval=1, percpu=False) #ignore first call - often returns 0
+      time.sleep(0.12)
+      cpu_load = psutil.cpu_percent(interval=1, percpu=False)
+      #print "CPU Load: " + str(cpu_load)
+      print("CPU Load: " + str(cpu_load))
+      return cpu_load  
+
+def memory_usage():
+     mem_usage = psutil.virtual_memory().percent
+     #print "System Memory Usage: " + str( mem_usage)
+     print("System Memory Usage: " + str( mem_usage))
+     return mem_usage 
+
 @socketio.on('connect', namespace='/system') 
 def connect(): 
     #print "\n\nclient connected\n\n"
-    print("client connected")
+    print("********** client connected ************")
+
+    global monitoringThread
     socketio.emit('test', get_faces(), namespace='/system')
 
+    if not monitoringThread.isAlive():
+        #print "Starting monitoringThread"
+        monitoringThread = threading.Thread(name='stats_process_thread_',target= system_stats, args=())
+        monitoringThread.start()
 
 if __name__ == "__main__":
   #app.run()

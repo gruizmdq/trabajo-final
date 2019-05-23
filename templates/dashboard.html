@@ -121,7 +121,7 @@ position:absolute;
             <!--Card content-->
             <div class="card-body">
 
-              <canvas id="myChart"></canvas>
+              <canvas id="cameras-fps"></canvas>
 
             </div>
 
@@ -144,9 +144,9 @@ position:absolute;
 
             <!--Card content-->
             <div class="card-body">
-
-              <canvas id="pieChart"></canvas>
-
+              <div class="text-center">
+                <span class="min-chart" id="chart-cpu" data-percent="100"><span class="percent"></span></span>
+              </div>
             </div>
 
           </div>
@@ -1270,6 +1270,7 @@ position:absolute;
     </div>
     <!--/.Copyright-->
 
+    
   </footer>
   <!--/.Footer-->
 
@@ -1294,13 +1295,13 @@ position:absolute;
   <!-- Charts -->
   <script>
     // Line
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
+    var fps = document.getElementById("cameras-fps").getContext('2d');
+    var camerasFPS = new Chart(fps, {
       type: 'bar',
       data: {
         labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
         datasets: [{
-          label: '# of Votes',
+          label: 'Frames per Seconds',
           data: [12, 19, 3, 5, 2, 3],
           backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
@@ -1331,25 +1332,6 @@ position:absolute;
         }
       }
     });
-
-    //pie
-    var ctxP = document.getElementById("pieChart").getContext('2d');
-    var myPieChart = new Chart(ctxP, {
-      type: 'pie',
-      data: {
-        labels: ["Red", "Green", "Yellow", "Grey", "Dark Grey"],
-        datasets: [{
-          data: [300, 50, 100, 40, 120],
-          backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
-          hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5", "#616774"]
-        }]
-      },
-      options: {
-        responsive: true,
-        legend: false
-      }
-    });
-
 
     //line
     var ctxL = document.getElementById("lineChart").getContext('2d');
@@ -1515,7 +1497,7 @@ position:absolute;
     function add_faces(detections){
       $("#face-detection").children().remove();
       for (var i = 0; i < detections.length ; i++){
-        html = '<div id="item-prediction-'+detections[i]["name"]+'" class="col-md-2 mt-3 text-center"><img class="img-thumbnail face-thumb panel panel-default" src="static/'+detections[i]["id"]+'.jpg">'
+        html = '<div id="item-prediction-'+detections[i]["name"]+'" class="col-md-2 mt-3 text-center"><img class="img-thumbnail face-thumb panel panel-default" src="static/faces/'+detections[i]["thumb"]+'">'
         html += '<h5 class="card-title">'+ detections[i]["name"] + '</h5><p class="card-text">Camera ' + detections[i]["camera"] + '</p><p class="card-text">' + detections[i]["time"] + '</p>'
         color = 'green'
         if (detections[i]["name"].includes('unknown'))
@@ -1524,7 +1506,7 @@ position:absolute;
           else 
             color = 'red'
         html += '<div class="progress md-progress" style="height: 20px"><div class="progress-bar ' + color + '" role="progressbar" style="width: ' + detections[i]["confidence"] + '%; height: 20px" aria-valuenow="' + detections[i]["confidence"] + '" aria-valuemin="0" aria-valuemax="100">' + detections[i]["confidence"] + '%</div></div>'
-        html += "<div id='prediction-actions' class='mt-1'><a><i class='fas fa-check text-green' ></i></a> <a data-camera='"+detections[i]["camera"]+"' data-name='"+detections[i]["name"]+"' id='detection-"+detections[i]["id"]+"'class='text-red'><i class='fas fa-times ml-3'></i></a>"
+        html += "<div id='prediction-actions' class='mt-1'><a><i class='fas fa-check text-green' ></i></a> <a data-camera='"+detections[i]["camera"]+"' data-name='"+detections[i]["name"]+"' class='text-red'><i class='fas fa-times ml-3'></i></a>"
         html += "</div>"
         html += "</div>"
 
@@ -1535,11 +1517,32 @@ position:absolute;
     $(document).ready(function(){
       var socket = io.connect('http://' + document.domain + ':' + location.port + '/system');
       socket.on('test', function(json) {   
-              console.log("Test: " + json);
               detections = JSON.parse(json)
               add_faces(detections)
               
       });
+
+      socket.on('system_monitoring', function(json) {   
+        stats = JSON.parse(json)
+        //FPS STATS
+        fps_cameras = stats["camerasFPS"]
+        for (var i = 0; i < fps_cameras.length; i++) {
+          camerasFPS.data.labels[i] = "Camara " + i
+          camerasFPS.data.datasets[0].data[i] = fps_cameras[i]
+          console.log(fps_cameras[i])
+        }  
+        camerasFPS.update();  
+
+        // MEMORY    
+
+        $('.min-chart#chart-cpu').easyPieChart({
+          barColor: "#4caf50",
+          onStep: function (from, to, percent) {
+            $(this.el).find('.percent').text(Math.round(percent));
+          }
+        });
+      });
+
 
       $(document).on('click', '#prediction-actions a', function(){
         name = $(this).attr('data-name');

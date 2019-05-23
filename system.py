@@ -1,12 +1,13 @@
 # import the necessary packages
-from imutils.video import FPS
 import cv2
+import time
 from recognize_video import FaceRecognizer
 from detector import FaceDetector
 import constants as CONSTANTS
 from camera import Camera
 import threading
 from person import Person
+from persistence import Persistence
 
 class System(object):
     """
@@ -38,16 +39,30 @@ class System(object):
         """
         camera = self.cameras.pop(id)
         camera.processing_on = False
+        camera.stop()
         self.camerasThreads.pop(id)
 
     def process(self, camera):
 
         # start the FPS throughput estimator
-        fps = FPS().start()
+
+        FPScount = 0 # Used to calculate frame rate at which frames are being processed
+        FPSstart = time.time()
+        
 
         while camera.processing_on:
-            frame = camera.get_frame()
 
+            frame = camera.get_frame()
+            camera.tempFrame = frame
+
+            if FPScount == 5:
+                camera.fps = 5/(time.time() - FPSstart)
+                FPSstart = time.time()
+                FPScount = 0
+
+            FPScount += 1
+            cv2.putText(frame, "[INFO] FPS: {:.2f}".format(camera.fps), (25, 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            
             #Detection
             frame, faces = self.detector.detect(frame)
             people = camera.update_people(faces)
@@ -67,15 +82,16 @@ class System(object):
                             prediction = self.recognizer.make_prediction(face[0], frame, face[1], face[2], face[3], face[4])
                             
                             if not (prediction is None):
-                                person.confidence = prediction['confidence']
+                                person.set_recognized(prediction['confidence'])
                                 person.name = prediction['name']
+                                person.confidence = prediction['confidence']
+                                person.set_thumb(face[0])
                                 self.test_until_database_detections[person.id] = person
                     except Exception as e:
                         print(str(e))
-                    
+                    """
                 
-            cv2.imshow("asd", frame)
-            """ if not (faces is None):
+            if not (faces is None):
                 for face in faces:
                     try:
                         #face, frame, startX, startY, endX, endY
@@ -103,7 +119,10 @@ class System(object):
                                     #check_unknown
 
                     except Exception as e:
-                        print(str(e)) """
+                        print(str(e))
+                   """    
+            cv2.imshow("asd", frame)
+            
             
             
             
@@ -114,8 +133,7 @@ class System(object):
             camera.processedFrame = frame
             #cv2.imshow("Frame", frame)
 
-            # update the FPS counter
-            fps.update()
+            
 
             key = cv2.waitKey(1) & 0xFF
             # if the `q` key was pressed, break from the loop
@@ -123,14 +141,16 @@ class System(object):
                 #break
                 self.remove_camera(camera.id)
 
-        # stop the timer and display FPS information
-        fps.stop()
-        # do a bit of cleanup
-        print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
-        print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+        
         #cv2.destroyAllWindows()
         #camera.stop()
+
+    def add_detection_database(self, person):
+        print(person.toJSON)
+        Persistence.insert_detection(person.toJSON())
     
 
+    def get_fps(self, camera):
+        return camera.fps
 
         

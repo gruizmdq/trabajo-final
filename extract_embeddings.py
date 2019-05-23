@@ -88,7 +88,7 @@ for (i, imagePath) in enumerate(imagePaths):
 		# ensure that the detection with the largest probability also
 		# means our minimum probability test (thus helping filter out
 		# weak detections)
-		if confidence > args["confidence"]:
+		if confidence > .75:
 			# compute the (x, y)-coordinates of the bounding box for
 			# the face
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])

@@ -1,6 +1,5 @@
 # import the necessary packages
 from imutils.video import VideoStream
-from imutils.video import FPS
 from scipy.spatial import distance as dist
 from collections import OrderedDict
 from person import Person
@@ -11,16 +10,19 @@ import time
 import cv2
 import os
 import threading
+import constants as CONSTANTS
 
 class Camera:
     """
     Camera: this object will capture frames from a camera/
     
     """
-    def __init__(self, id):
+    def __init__(self, id, system):
         self.tempFrame = 0
         self.processedFrame = 0
         self.id = id
+        self.system = system
+        self.fps = 0
         self.processing_on = True
         self.vs = VideoStream(src=0).start()
         #All detected people
@@ -35,12 +37,13 @@ class Camera:
         self.readingThread.daemon = True
         self.readingThread.start()
 
-        self.frames_to_delete_detection = 50
+        self.frames_to_delete_detection = CONSTANTS.FRAMES_TO_DELETE_DETECTION
 
     def start_read(self):
         while True:
             self.current_frame = self.vs.read()
             self.current_frame = cv2.flip(self.current_frame,1) 
+            
 
     def get_frame(self):  
         #frame = self.vs.read()
@@ -94,7 +97,7 @@ class Camera:
         # centroids and register each of them
         if len(self.detected_people) == 0:
             for i in range(0, len(frame_centroids)):
-                self.add_detected_person(Person(frame_centroids[i], faces_coordenates[i]))
+                self.add_detected_person(Person(self.id, frame_centroids[i], faces_coordenates[i][0]))
 
         # otherwise, are are currently tracking objects so we need to
         # try to match the input centroids to existing object
@@ -181,14 +184,14 @@ class Camera:
             # register each new input centroid as aregister trackable object
             else:
                 for col in unused_cols:
-                    self.add_detected_person(Person(frame_centroids[col], faces_coordenates[col]))
+                    self.add_detected_person(Person(self.id, frame_centroids[col], faces_coordenates[col][0]))
 
         # return the set of trackable objects
         return self.detected_people
 
     def delete_person(self, person_id):
-		# to deregister an object ID we delete the object ID from
-		# both of our respective dictionaries
+		#First, add detection to a database
+        self.system.add_detection_database(self.detected_people[person_id])
         del self.detected_people[person_id]
         del self.people_disappeared[person_id]
 

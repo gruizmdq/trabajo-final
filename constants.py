@@ -1,10 +1,10 @@
 #DATABASE
+DATABASE_HOST = 'mongodb://localhost:27017'
 DATABASE_NAME = 'security_system'
 COLLECTION_USERS = 'users'
 COLLECTION_DETECTIONS = 'detections'
 COLLECTION_ALERTS = 'alerts'
 COLLECTION_PEOPLE = 'people'
-
 
 MODEL_PATH = 'face_detection_model/'
 MODEL_PROTOTXT = 'deploy.prototxt'
@@ -14,10 +14,12 @@ EMBEDDING_MODEL_PATH = "openface_nn4.small2.v1.t7"
 RECOGNIZER_PATH = "output/recognizer.pickle"
 LABEL_ENCODER_PATH = "output/le.pickle"
 
-UNRECOGNIZED_FACES_PATH = 'unrecognized/'
+FACES_PATH = 'static/faces/'
 
 CONFIDENCE_TO_ACCEPT_DETECTION = .90
 CONFIDENCE_TO_ACCEPT_RECOGNITION = .80
 CONFIDENCE_TO_UNKNOWN_FACES = .50
 
 SECONDS_BETWEEN_CAPTURE = 2
+
+FRAMES_TO_DELETE_DETECTION = 20
