@@ -1,0 +1,28 @@
+{% extends "page.html" %}
+{% block body %}
+ <!-- Start your project here-->
+<div style="height: 100vh">
+    <div class="flex-center flex-column">
+
+            <form class="animated fadeIn text-muted" method=POST>
+                <div class="form-group">
+                    <input type="email" class="form-control" name="email" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="pass" placeholder="Password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Log In</button>
+            </form>
+
+            <br>
+            <div class="animated fadeIn text-muted">
+                Don't have an account? <a href="{{ url_for('register') }}">Sign up here</a>.
+            </div>
+
+            {% if error %}
+            <h3 class="animated fadeIn text-muted text-red">{{ error }}</h3>
+            {% endif %}
+    </div>
+</div>
+{% endblock %}
+      <!-- Material form login -->

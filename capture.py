@@ -14,7 +14,7 @@ ap = argparse.ArgumentParser()
 
 ap.add_argument("-o", "--output", required=True,
 	help="Name of the person")
-ap.add_argument("-c", "--confidence", type=float, default=0.5,
+ap.add_argument("-c", "--confidence", type=float, default=0.75,
 	help="minimum probability to filter weak detections")
 args = vars(ap.parse_args())
 
@@ -77,7 +77,7 @@ while True:
         (startX, startY, endX, endY) = box.astype("int")
 
         quantity_photos += 1
-        img_item =  OUTPUT_PATH + str(quantity_photos) + ".png"        
+        img_item =  OUTPUT_PATH + str(quantity_photos) + ".jpg"        
         cv2.imwrite(img_item, frame)
 
 		# draw the bounding box of the face along with the associated

@@ -34,7 +34,6 @@ class FaceRecognizer():
 		faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255, (96, 96), (0, 0, 0), swapRB=True, crop=False)
 		self.embedder.setInput(faceBlob)
 		vec = self.embedder.forward()
-
 		# perform classification to recognize the face
 		preds = self.recognizer.predict_proba(vec)[0]
 		j = np.argmax(preds)
@@ -48,10 +47,8 @@ class FaceRecognizer():
 			text = "{}: {:.2f}%".format(name, proba * 100)
 			color = (0, 0, 255)
 			recognized = True
-
 		else: 
 			text = "unknown"
-			
 			color = (255, 0, 0)
 			recognized = False
 			now = time.time()

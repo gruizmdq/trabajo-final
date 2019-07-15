@@ -17,6 +17,7 @@ lib/
 *.jpg
 centroidtracker.py
 object_tracker.py
+static/videos/
 
 # Compiled source #
 ###################

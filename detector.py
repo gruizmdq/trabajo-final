@@ -10,7 +10,7 @@ class FaceDetector():
     Face Detector. This detect faces from a frames.
     """
     protoPath = os.path.sep.join([CONSTANTS.MODEL_PATH, CONSTANTS.MODEL_PROTOTXT])
-    modelPath = os.path.sep.join([CONSTANTS.MODEL_PATH, CONSTANTS.MODEL_PRE_TRAINEED])
+    modelPath = os.path.sep.join([CONSTANTS.MODEL_PATH, CONSTANTS.MODEL_PRE_TRAINED])
     detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
     embedder = cv2.dnn.readNetFromTorch(CONSTANTS.EMBEDDING_MODEL_PATH)
 

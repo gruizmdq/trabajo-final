@@ -1,0 +1,37 @@
+{% extends "page.html" %}
+{% block body %} 
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <form method='POST' action="{{ url_for('register') }}">
+                <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <input type="text" class="form-control" name="name" required placeholder="Nombre">
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Apellido</label>
+                    <input type="text" class="form-control" name="last_name" required placeholder="Apellido">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" name="email" required placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" class="form-control" name="pass" required placeholder="Contraseña">
+                </div>
+                <div class="form-group">
+                    <label for="owner">Owner</label>
+                    <input type="number" class="form-control" name="owner" value='1' required placeholder="Owner">
+                </div>
+                <div class="form-group">
+                    <label for="house">Departamento</label>
+                    <input type="text" class="form-control" name="house" required placeholder="Departamento">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+            <br>
+        </div>
+    </div>
+</div>
+{% endblock %}

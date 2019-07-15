@@ -1,0 +1,13 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width">
+</head>
+<body>
+    <video id = 'v' controls="" autoplay="" name="media">
+        <source src="{{ url }}" type="video/webm">
+    </video>
+</body>
+    <script>
+        document.getElementById('v').currentTime = {{ position }}
+    </script>
+</html>

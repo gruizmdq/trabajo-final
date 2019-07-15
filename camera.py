@@ -11,6 +11,7 @@ import cv2
 import os
 import threading
 import constants as CONSTANTS
+import queue
 
 class Camera:
     """
@@ -18,6 +19,9 @@ class Camera:
     
     """
     def __init__(self, id, system):
+        #Filename where video is recorded
+        self.filename = ""
+        self.time_recording = 0
         self.tempFrame = 0
         self.processedFrame = 0
         self.id = id
@@ -27,23 +31,21 @@ class Camera:
         self.vs = VideoStream(src=0).start()
         #All detected people
         self.detected_people = {}
-        #All recognized people
-        self.recognized_people = {}
         #Unknown detections.
         self.unknown_people = {}
         #People who was detected and now it is not.\
         self.people_disappeared = {}
+        self.current_frame = None
+        #Start reading
         self.readingThread = threading.Thread(name='reading_thread',target=self.start_read)
         self.readingThread.daemon = True
         self.readingThread.start()
-
         self.frames_to_delete_detection = CONSTANTS.FRAMES_TO_DELETE_DETECTION
 
     def start_read(self):
         while True:
             self.current_frame = self.vs.read()
-            self.current_frame = cv2.flip(self.current_frame,1) 
-            
+            self.current_frame = cv2.flip(self.current_frame,1)
 
     def get_frame(self):  
         #frame = self.vs.read()
@@ -97,7 +99,7 @@ class Camera:
         # centroids and register each of them
         if len(self.detected_people) == 0:
             for i in range(0, len(frame_centroids)):
-                self.add_detected_person(Person(self.id, frame_centroids[i], faces_coordenates[i][0]))
+                self.add_detected_person(Person(self.id, frame_centroids[i], faces_coordenates[i][0], self.filename, self.time_recording))
 
         # otherwise, are are currently tracking objects so we need to
         # try to match the input centroids to existing object
@@ -184,7 +186,7 @@ class Camera:
             # register each new input centroid as aregister trackable object
             else:
                 for col in unused_cols:
-                    self.add_detected_person(Person(self.id, frame_centroids[col], faces_coordenates[col][0]))
+                    self.add_detected_person(Person(self.id, frame_centroids[col], faces_coordenates[col][0], self.filename, self.time_recording))
 
         # return the set of trackable objects
         return self.detected_people
@@ -200,3 +202,14 @@ class Camera:
         # ID to store the centroid
         self.detected_people[person.id] = person
         self.people_disappeared[person.id] = 0
+
+    def borrar(self):
+        time.sleep(5)
+        frame = self.get_frame()
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        (h, w) = frame.shape[:2]
+        out = cv2.VideoWriter('output.avi', fourcc, 15.0, (w,h))
+        out.write(frame)
+        while True:
+            #frame = self.queue.get()
+            out.write(self.get_frame()) 

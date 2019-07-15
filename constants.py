@@ -1,20 +1,22 @@
 #DATABASE
-DATABASE_HOST = 'mongodb://localhost:27017'
+DATABASE_HOST = 'mongodb://localhost:27017/'
 DATABASE_NAME = 'security_system'
 COLLECTION_USERS = 'users'
 COLLECTION_DETECTIONS = 'detections'
 COLLECTION_ALERTS = 'alerts'
 COLLECTION_PEOPLE = 'people'
+COLLECTION_NOTIFICATIONS = 'notifications'
 
 MODEL_PATH = 'face_detection_model/'
 MODEL_PROTOTXT = 'deploy.prototxt'
-MODEL_PRE_TRAINEED = 'res10_300x300_ssd_iter_140000.caffemodel'
+MODEL_PRE_TRAINED = 'res10_300x300_ssd_iter_140000.caffemodel'
 
 EMBEDDING_MODEL_PATH = "openface_nn4.small2.v1.t7"
 RECOGNIZER_PATH = "output/recognizer.pickle"
 LABEL_ENCODER_PATH = "output/le.pickle"
 
 FACES_PATH = 'static/faces/'
+VIDEO_RECORDING_PATH  = 'static/videos/'
 
 CONFIDENCE_TO_ACCEPT_DETECTION = .90
 CONFIDENCE_TO_ACCEPT_RECOGNITION = .80

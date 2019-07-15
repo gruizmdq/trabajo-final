@@ -60,7 +60,6 @@ for (i, imagePath) in enumerate(imagePaths):
 	#'adrian'
 	#>>>
 	name = imagePath.split(os.path.sep)[-2]
-
 	# load the image, resize it to have a width of 600 pixels (while
 	# maintaining the aspect ratio), and then grab the image
 	# dimensions
@@ -88,7 +87,7 @@ for (i, imagePath) in enumerate(imagePaths):
 		# ensure that the detection with the largest probability also
 		# means our minimum probability test (thus helping filter out
 		# weak detections)
-		if confidence > .75:
+		if confidence > .90:
 			# compute the (x, y)-coordinates of the bounding box for
 			# the face
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
