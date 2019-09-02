@@ -116,70 +116,9 @@
 
     <!--Grid row-->
     <div class="row wow mb-4  fadeIn">
-
-      <div class="col-md-4 mb-4">
-        <!--Card-->
-        <div class="card z-depth-0">
-          <div class="card-header elegant-color m-0 p-0">
-            <img style="border: none" class="m-0 p-0 img-thumbnail panel panel-default" id="0" src="{{ url_for('video_streamer2', id = 0) }}">
-            <div class="position-absolute full-size blue p-1 text-white">
-              <span>Full Size</span>  
-            </div>
-
-          </div>
-          <!--Card content-->
-          <div class="card-body border-left-blue">
-            <h5 class="m-0">Camera #1</h5>
-          </div>
-
-        </div>
-        <!--/.Card-->
-      </div>
-
-      <div class="col-md-4 mb-4">
-        <!--Card-->
-        <div class="card z-depth-0">
-          <div class="card-header elegant-color m-0 p-0">
-            <img style="border: none" class="m-0 p-0 img-thumbnail panel panel-default" id="0" src="{{ url_for('video_streamer2', id = 0) }}">
-            <div class="position-absolute full-size blue p-1 text-white">
-              <span>Full Size</span>  
-            </div>
-
-          </div>
-          <!--Card content-->
-          <div class="card-body border-left-blue">
-            <h5 class="m-0">Camera #1</h5>
-          </div>
-
-        </div>
-        <!--/.Card-->
-      </div>
-
-      <div class="col-md-4 mb-4">
-        <!--Card-->
-        <div class="card z-depth-0">
-          <div class="card-header elegant-color m-0 p-0">
-            <img style="border: none" class="m-0 p-0 img-thumbnail panel panel-default" id="0" src="{{ url_for('video_streamer2', id = 0) }}">
-            <div class="position-absolute full-size blue p-1 text-white">
-              <span>Full Size</span>  
-            </div>
-
-          </div>
-          <!--Card content-->
-          <div class="card-body border-left-blue">
-            <h5 class="m-0">Camera #1</h5>
-          </div>
-
-        </div>
-        <!--/.Card-->
-      </div>
       
-
     </div>
-    <!--Grid row-->
 
-
-    <!-- Heading -->
     <div class="card mb-4 wow fadeIn border-left-blue">
 
       <!--Card content-->
@@ -254,12 +193,13 @@
     var count = 0
 
     function get_faces(){
+      console.log('asdasdas');
         $.ajax({
             type: "GET",
-            url: "{{ url_for('get_faces') }}",
-
+            url: "{{ url_for('get_faces_name', name='Gonza2_222_4b') }}",
             success: function(data) {
               detections = JSON.parse(data)
+              console.log('dale pa')
               add_faces(detections)
             },
             error: function(error) {
@@ -299,23 +239,10 @@
       }
     }
 
+    
     $(document).ready(function(){
-      var socket = io.connect('http://' + document.domain + ':' + location.port + '/system');
-      
-      socket.on('get_faces', function(json) {   
-              detections = JSON.parse(json)
-              add_faces(detections)
-      });
-
-      socket.on('system_monitoring', function(json) {   
-        stats = JSON.parse(json)
-        //FPS STATS
-        fps_cameras = stats["camerasFPS"]
-        for (var i = 0; i < fps_cameras.length; i++) {
-          console.log(fps_cameras[i])
-        }  
-      });
-
+      get_faces();
+    })
 
       $(document).on('click', '#prediction-actions a', function(){
 
@@ -347,7 +274,6 @@
             }
       });
       })
-    })
 
       </script>
 {% endblock %}

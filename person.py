@@ -25,13 +25,7 @@ class Person(object):
         self.time_detection_video = time_detection
 
     def set_thumb(self, face):
-        #ret, jpeg = cv2.imencode('.jpg', face)
-        #self.thumb = jpeg.tostring()
-        print('**********************************')
-        print('**********************************')
-        print('ENTRO')
         if self.thumb == "":
-            print('TABA VACÍO')
             files = list(os.listdir(CONSTANTS.FACES_PATH))
             filename = '1'
             if files:

@@ -14,10 +14,9 @@ class FaceDetector():
     detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
     embedder = cv2.dnn.readNetFromTorch(CONSTANTS.EMBEDDING_MODEL_PATH)
 
-    def __init__(self, controller):
+    def __init__(self):
         # load our serialized face detector from disk
         print("[INFO] loading face detector...")
-        self.controller = controller
 
     def detect(self, frame):
         # resize the frame to have a width of 600 pixels (while
@@ -28,78 +27,51 @@ class FaceDetector():
 
         # construct a blob from the image
         imageBlob = cv2.dnn.blobFromImage(
-            cv2.resize(frame, (300, 300)), 1.0, (300, 300),
+            cv2.resize(frame, (224, 224)), 1.0, (224, 224),
             (104.0, 177.0, 123.0), swapRB=False, crop=False)
 
         # apply OpenCV's deep learning-based face detector to localize
         # faces in the input image
-        self.detector.setInput(imageBlob)
-        detections = self.detector.forward()
-
-        #array with all faces detected
         arr_faces = []
-        for i in range(0, detections.shape[2]):
-            # extract the confidence (i.e., probability) associated with
-            # the prediction
-            confidence = detections[0, 0, i, 2]
 
-            # filter out weak detections
-            if confidence > CONSTANTS.CONFIDENCE_TO_ACCEPT_DETECTION:
-                # compute the (x, y)-coordinates of the bounding box for
-                # the face
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                (startX, startY, endX, endY) = box.astype("int")
+        try:
+            self.detector.setInput(imageBlob)   
+            detections = self.detector.forward()
+            #array with all faces detected
+            end_loop = False
+            i = 0
+            #to avoid processing to many poor detections
+            if len(detections) > 0:
+                while not end_loop:
+                #for i in range(0, detections.shape[2]):
+                    # extract the confidence (i.e., probability) associated with
+                    # the prediction
+                    confidence = detections[0, 0, i, 2]
+                    
 
-                # extract the face ROI
-                face = frame[startY:endY, startX:endX]
-                (fH, fW) = face.shape[:2]
+                    # filter out weak detections
+                    if confidence > CONSTANTS.CONFIDENCE_TO_ACCEPT_DETECTION:
+                        # compute the (x, y)-coordinates of the bounding box for
+                        # the face
+                        box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                        (startX, startY, endX, endY) = box.astype("int")
 
-                # ensure the face width and height are sufficiently large
-                if fW < 20 and fH < 20:
-                    continue
-                arr_faces.append([face, startX, startY, endX, endY])
-                # Adding try to fix bug.
-                #try:
-                 #  self.controller.recognizer.make_prediction(face, frame, startX, startY, endX, endY)
-                #except Exception as e:
-                 #  print(str(e))
+                        # extract the face ROI
+                        face = frame[startY:endY, startX:endX]
+                        (fH, fW) = face.shape[:2]
 
+                        # ensure the face width and height are sufficiently large
+                        if fW < 20 and fH < 20:
+                            continue
+                        arr_faces.append([face, startX, startY, endX, endY])
+
+                        i += 1
+                        if (i >= detections.shape[2]):
+                            end_loop = True
+                    else:
+                        end_loop = True
+        except Exception as e:
+            print("********************************* EXCEP " +str(e))
         # show the output frame
         return frame, arr_faces
 
-
-    def save_frame(self, frame):
-        img_item =  CONSTANTS.UNRECOGNIZED_FACES_PATH + str(len(os.listdir(CONSTANTS.UNRECOGNIZED_FACES_PATH))) + ".png"
-        cv2.imwrite(img_item, frame)
-        pass
-
-    def make_prediction(self, face, frame, startX, startY, endX, endY):
-        faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255, (96, 96), (0, 0, 0), swapRB=True, crop=False)
-        embedder.setInput(faceBlob)
-        vec = embedder.forward()
-
-        # perform classification to recognize the face
-        preds = recognizer.predict_proba(vec)[0]
-        j = np.argmax(preds)
-        proba = preds[j]
-        name = le.classes_[j]
-
-        # draw the bounding box of the face along with the
-        # associated probability
-        if proba > CONSTANTS.CONFIDENCE_TO_ACCEPT_RECOGNITION:
-            text = "{}: {:.2f}%".format(name, proba * 100)
-            color = (0, 0, 255)
-
-        else: 
-            text = "desconocido:"
-            color = (255, 0, 0)
-            
-
-        #copy frame	to save 
-        frame_copy = frame.copy()
-        y = startY - 10 if startY - 10 > 10 else startY + 10
-        cv2.rectangle(frame, (startX, startY), (endX, endY),
-                color, 2)
-        cv2.putText(frame, text, (startX, y),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
-        self.save_frame(frame_copy)

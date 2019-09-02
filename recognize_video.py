@@ -20,22 +20,15 @@ class FaceRecognizer():
 
 	def __init__(self, system):
 		self.last_time = time.time()
-		self.unknowns_count = 0
 		self.system = system
 
-	def save_frame(self, text, frame):
-		path = CONSTANTS.UNRECOGNIZED_FACES_PATH + text
-		os.makedirs(path, exist_ok=True)
-		img_item =  path + str(len(os.listdir(path))) + ".png"
-		cv2.imwrite(img_item, frame)
-		pass
-
-	def make_prediction(self, face, frame, startX, startY, endX, endY):
+	def make_prediction(self, face):
 		faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255, (96, 96), (0, 0, 0), swapRB=True, crop=False)
 		self.embedder.setInput(faceBlob)
 		vec = self.embedder.forward()
 		# perform classification to recognize the face
-		preds = self.recognizer.predict_proba(vec)[0]
+		preds = self.recognizer.predict_proba(vec)
+		preds = preds[0]
 		j = np.argmax(preds)
 		proba = preds[j]
 		name = self.le.classes_[j]
@@ -44,24 +37,13 @@ class FaceRecognizer():
 		# associated probability
 		
 		if proba > CONSTANTS.CONFIDENCE_TO_ACCEPT_RECOGNITION:
-			text = "{}: {:.2f}%".format(name, proba * 100)
-			color = (0, 0, 255)
+			text = name
 			recognized = True
 		else: 
 			text = "unknown"
-			color = (255, 0, 0)
 			recognized = False
-			now = time.time()
 			if proba > CONSTANTS.CONFIDENCE_TO_UNKNOWN_FACES:
-				name = text + "-" + name
-			else:
-				self.unknowns_count += 1
-				name = text + str(self.unknowns_count)
+				text = text + "-" + name
 
-		y = startY - 10 if startY - 10 > 10 else startY + 10
-		cv2.rectangle(frame, (startX, startY), (endX, endY),
-				color, 2)
-		cv2.putText(frame, text, (startX, y),
-				cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
-		return {"name": name, "face": face, "confidence": proba, "recognized": recognized}
+		return {"name": text, "face": face, "confidence": proba, "recognized": recognized}
 		

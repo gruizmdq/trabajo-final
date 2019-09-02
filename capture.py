@@ -103,5 +103,4 @@ while True:
 # do a bit of cleanup
 cv2.destroyAllWindows()
 vs.stop()
-os.system("python3 extract_embeddings.py")
-os.system("python3 train_model.py")
+del vs

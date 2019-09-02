@@ -18,17 +18,20 @@ class Camera:
     Camera: this object will capture frames from a camera/
     
     """
-    def __init__(self, id, system):
+    def __init__(self, url, id, name, system):
         #Filename where video is recorded
         self.filename = ""
         self.time_recording = 0
         self.tempFrame = 0
         self.processedFrame = 0
         self.id = id
+        self.name = name
         self.system = system
         self.fps = 0
+        self.url = url
         self.processing_on = True
-        self.vs = VideoStream(src=0).start()
+        self.vs = VideoStream(url)
+
         #All detected people
         self.detected_people = {}
         #Unknown detections.
@@ -43,9 +46,13 @@ class Camera:
         self.frames_to_delete_detection = CONSTANTS.FRAMES_TO_DELETE_DETECTION
 
     def start_read(self):
-        while True:
+        self.vs.start()
+        while self.processing_on:
             self.current_frame = self.vs.read()
             self.current_frame = cv2.flip(self.current_frame,1)
+        self.vs.stop()
+        del self.vs
+        
 
     def get_frame(self):  
         #frame = self.vs.read()

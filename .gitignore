@@ -1,4 +1,8 @@
 # Don't track content of these folders
+*.webm
+*.txt
+borrar2.py
+hackerrank.py
 dataset/
 unrecognized/
 .pylintrc
